@@ -11,10 +11,11 @@ from xml.sax.saxutils import unescape
 
 class SnapContextBlock(XBlock):
     """
-    An XBlock providing oEmbed capabilities for video
+    An XBlock providing snap content inside an iframe
     """
-
-    problem_data_url = String(help="URL of the video page at the provider", default=None, scope=Scope.content)
+    problem_host = String(help="Launchpad for snap content",
+                          default='http://temomachine3.bioinformatics.vt.edu:8010/snap/launch/', scope=Scope.content)
+    problem_name = String(help="Name of the problem", default='SnapDemo.xml', scope=Scope.content)
 
     def student_view(self, context):
         """
@@ -25,34 +26,26 @@ class SnapContextBlock(XBlock):
         to display.
         """
 
-        # Get the url where the snap json data is at. Unescape the xml-escaped url.
-        # XML-Escaped URL: https://drive.google.com/uc?export=download&amp;id=0B-WWj_i0WSomWFlvcURmaExsbWM
-        #   XML-UnEscaped URL: https://drive.google.com/uc?export=download&id=0B-WWj_i0WSomWFlvcURmaExsbWM
-        xml_unescaped_url = unescape(self.problem_data_url)
+        # Get the problem name
+        problem_name = self.problem_name
+        problem_host = self.problem_host
 
-        # Grab the content from the file as json.
-        json_data = requests.get(xml_unescaped_url).json()
-
-        snap_problem_pretext = json_data['snap_problem_pretext']
-        snap_problem_url = json_data['snap_problem_url']
-        snap_problem_posttext = json_data['snap_problem_posttext']
+        absolute_snap_problem_url = str(problem_host) + str(problem_name)
 
         # Load the HTML fragment from within the package and fill in the template
         html_str = pkg_resources.resource_string(__name__, "static/html/snap_context.html")
-        frag = Fragment(unicode(html_str).format(self=self,
-                                                 snap_problem_pretext=snap_problem_pretext,
-                                                 snap_problem_url=snap_problem_url,
-                                                 snap_problem_posttext=snap_problem_posttext))
+        frag = Fragment(unicode(html_str).format(self=self, absolute_snap_problem_url=absolute_snap_problem_url))
+
         return frag
 
     @staticmethod
     def workbench_scenarios():
         """A canned scenario for display in the workbench."""
         return [
-            ("snap_context",
+            ("snap context",
              """
             <vertical_demo>
-                <snap_context problem_data_url="https://drive.google.com/uc?export=download&amp;id=0B-WWj_i0WSomWFlvcURmaExsbWM" />
+                <snap_context />
             </vertical_demo>
             """)
         ]
