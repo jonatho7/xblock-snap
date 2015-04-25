@@ -1,7 +1,0 @@
-snap_context.py
-xblock_snap.egg-info/PKG-INFO
-xblock_snap.egg-info/SOURCES.txt
-xblock_snap.egg-info/dependency_links.txt
-xblock_snap.egg-info/entry_points.txt
-xblock_snap.egg-info/requires.txt
-xblock_snap.egg-info/top_level.txt
