@@ -1,3 +1,0 @@
-[xblock.v1]
-snap_context = snap_context:SnapContextBlock
-
