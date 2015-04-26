@@ -14,11 +14,17 @@ class SnapContextBlock(XBlock):
     An XBlock providing snap content inside an iframe
     """
     problem_host = String(help="Launchpad for snap content",
-                          default='http://127.0.0.1:9000/snap/launch/', scope=Scope.content)
-    problem_name = String(help="Name of the problem", default='convertFtoC_teacherProgram.xml', scope=Scope.content)
+                          default='http://127.0.0.1:9000/snap/launch/',
+                          scope=Scope.content)
+
+    problem_name = String(help="Name of the problem", default='convertFtoC_studentProgram.xml', scope=Scope.content)
+
+    teacher_instance = String(help="Reference to solved teacher instance of the problem",
+                              default='convertFtoC_teacherProgram.xml', scope=Scope.content)
 
     watched_count = Integer(help="Number of times user has watched this snap instance", default=0,
                             scope=Scope.user_state)
+
 
     def student_view(self, context):
         """
@@ -37,13 +43,28 @@ class SnapContextBlock(XBlock):
 
         # Load the HTML fragment from within the package and fill in the template
         html_str = pkg_resources.resource_string(__name__, "static/html/snap_context.html")
-        frag = Fragment(unicode(html_str).format(self=self, absolute_snap_problem_url=absolute_snap_problem_url))
+        frag = Fragment(unicode(html_str).format(self=self, absolute_snap_problem_url=absolute_snap_problem_url,
+                                                 watched_count=self.watched_count))
 
+
+        # Add message event javascript
         js_str = pkg_resources.resource_string(__name__, 'static/js/messaging_xblock.js')
         frag.add_javascript(unicode(js_str))
+
         frag.initialize_js('java_script_initializer')
 
         return frag
+
+    @XBlock.json_handler
+    def handle_watched_count(self, data, suffix=''):
+        """
+
+        Called to update the watched_count variable
+        """
+        if data.get('watched'):
+            self.watched_count += 1
+
+        return {'watched_count': self.watched_count}
 
     @staticmethod
     def workbench_scenarios():

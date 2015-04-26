@@ -20,7 +20,8 @@
 var MESSAGES_TYPE = {
     DEMO:  'DEMO',  // only for demo purposes
     SUBMIT: 'SUBMIT', //Used for communication of submit option
-    READY: 'READY'   // Message to indicate that iframe is setup
+    READY: 'READY',   // Message to indicate that iframe is setup
+    WATCHED: 'WATCHED'  // Watched event to parent
 
 };
 
@@ -87,6 +88,26 @@ function java_script_initializer(runtime, element) {
     // Just for testing
     register_callback(MESSAGES_TYPE.DEMO, function (data) { console.log(" Data received from iframe", data); });
 
+    register_callback(MESSAGES_TYPE.WATCHED, function (data) {
+        update_watched_event(runtime, element, data);
+    });
+
 }
 
+function update_watched_event(runtime, element, data) {
+    // Update watched count variable on Xblock
+    var update_element = $(".status .watched_count");
+
+    $.ajax({
+        type: 'POST',
+        url: runtime.handlerUrl(element, 'handle_watched_count'),
+        data: JSON.stringify({
+                'watched': true
+        }),
+        success: function (result) {
+            update_element.text(result.watched_count);
+        }
+    });
+
+}
 
