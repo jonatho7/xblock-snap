@@ -14,14 +14,11 @@ class SnapContextBlock(XBlock):
     An XBlock providing snap content inside an iframe
     """
     problem_host = String(help="Launchpad for snap content",
-                          # default='http://127.0.0.1:9000/snap/launch/',
-                          default='http://temomachine3.bioinformatics.vt.edu:8010/snap/launch/',
+                          default='http://127.0.0.1:9000/snap/launch/',
+                          #default='http://temomachine3.bioinformatics.vt.edu:8010/snap/launch/',
                           scope=Scope.content)
 
-    problem_name = String(help="Name of the problem", default='convertFtoC_studentProgram.xml', scope=Scope.content)
-
-    teacher_instance = String(help="Reference to solved teacher instance of the problem",
-                              default='convertFtoC_teacherProgram.xml', scope=Scope.content)
+    problem_name = String(help="Name of the problem", default='convertFtoC', scope=Scope.content)
 
     opened_count = Integer(help="Number of times user has opened this snap xblock", default=0,
                             scope=Scope.user_state)
@@ -31,8 +28,6 @@ class SnapContextBlock(XBlock):
 
     maxwidth = Integer(help="Maximum width of the Snap IDE", default=800, scope=Scope.content)
     maxheight = Integer(help="Maximum height of the Snap IDE", default=500, scope=Scope.content)
-
-
 
 
     def student_view(self, context):
@@ -47,17 +42,16 @@ class SnapContextBlock(XBlock):
         # Increment the opened_count user variable
         self.opened_count += 1
 
-
         # Get the problem name
         problem_name = self.problem_name
         problem_host = self.problem_host
 
-        absolute_snap_problem_url = str(problem_host) + str(problem_name)
+        absolute_snap_student_problem_url = str(problem_host) + str(problem_name) + '/' + 'student/'
 
         # Load the HTML fragment from within the package and fill in the template
         html_str = pkg_resources.resource_string(__name__, "static/html/snap_context.html")
         frag = Fragment(unicode(html_str).format(self=self,
-                                                 absolute_snap_problem_url=absolute_snap_problem_url,
+                                                 absolute_snap_problem_url=absolute_snap_student_problem_url,
                                                  opened_count=self.opened_count,
                                                  watched_count=self.watched_count))
 
@@ -75,7 +69,9 @@ class SnapContextBlock(XBlock):
         Create a fragment used to display the edit view in the Studio.
         """
         html_str = pkg_resources.resource_string(__name__, "static/html/snap-xblock-edit.html")
-        frag = Fragment(unicode(html_str).format(problem_name=self.problem_name, maxwidth=self.maxwidth, maxheight=self.maxheight))
+
+        frag = Fragment(unicode(html_str).format(problem_name=self.problem_name, maxwidth=self.maxwidth,
+                                                 maxheight=self.maxheight))
 
         js_str = pkg_resources.resource_string(__name__, "static/js/snap-xblock-edit.js")
         frag.add_javascript(unicode(js_str))
