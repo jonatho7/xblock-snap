@@ -22,8 +22,13 @@ class SnapContextBlock(XBlock):
     teacher_instance = String(help="Reference to solved teacher instance of the problem",
                               default='convertFtoC_teacherProgram.xml', scope=Scope.content)
 
+    opened_count = Integer(help="Number of times user has opened this snap xblock", default=0,
+                            scope=Scope.user_state)
+
     watched_count = Integer(help="Number of times user has watched this snap instance", default=0,
                             scope=Scope.user_state)
+
+
 
 
     def student_view(self, context):
@@ -35,6 +40,10 @@ class SnapContextBlock(XBlock):
         to display.
         """
 
+        # Increment the opened_count user variable
+        self.opened_count += 1
+
+
         # Get the problem name
         problem_name = self.problem_name
         problem_host = self.problem_host
@@ -43,7 +52,9 @@ class SnapContextBlock(XBlock):
 
         # Load the HTML fragment from within the package and fill in the template
         html_str = pkg_resources.resource_string(__name__, "static/html/snap_context.html")
-        frag = Fragment(unicode(html_str).format(self=self, absolute_snap_problem_url=absolute_snap_problem_url,
+        frag = Fragment(unicode(html_str).format(self=self,
+                                                 absolute_snap_problem_url=absolute_snap_problem_url,
+                                                 opened_count=self.opened_count,
                                                  watched_count=self.watched_count))
 
 
