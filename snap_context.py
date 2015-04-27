@@ -29,6 +29,9 @@ class SnapContextBlock(XBlock):
     watched_count = Integer(help="Number of times user has watched this snap instance", default=0,
                             scope=Scope.user_state)
 
+    maxwidth = Integer(help="Maximum width of the Snap IDE", default=800, scope=Scope.content)
+    maxheight = Integer(help="Maximum height of the Snap IDE", default=500, scope=Scope.content)
+
 
 
 
@@ -66,6 +69,31 @@ class SnapContextBlock(XBlock):
         frag.initialize_js('java_script_initializer')
 
         return frag
+
+    def studio_view(self, context):
+        """
+        Create a fragment used to display the edit view in the Studio.
+        """
+        html_str = pkg_resources.resource_string(__name__, "static/html/snap-xblock-edit.html")
+        frag = Fragment(unicode(html_str).format(problem_name=self.problem_name, maxwidth=self.maxwidth, maxheight=self.maxheight))
+
+        js_str = pkg_resources.resource_string(__name__, "static/js/snap-xblock-edit.js")
+        frag.add_javascript(unicode(js_str))
+        frag.initialize_js('SnapEditBlock')
+
+        return frag
+
+    @XBlock.json_handler
+    def studio_submit(self, data, suffix=''):
+        """
+        Called when submitting the form in Studio.
+        """
+        self.maxwidth = data.get('maxwidth')
+        self.maxheight = data.get('maxheight')
+        self.problem_name = data.get('problem_name')
+
+        return {'result': 'success'}
+
 
     @XBlock.json_handler
     def handle_watched_count(self, data, suffix=''):
