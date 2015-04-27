@@ -21,7 +21,9 @@ var MESSAGES_TYPE = {
     DEMO:  'DEMO',  // only for demo purposes
     SUBMIT: 'SUBMIT', //Used for communication of submit option
     READY: 'READY',   // Message to indicate that iframe is setup
-    WATCHED: 'WATCHED'  // Watched event to parent
+    WATCHED: 'WATCHED',  // Watched event to parent
+    SUBMIT:  'SUBMIT',  // Submit (obviously student submit) event from Xblock
+    RESULT:  'RESULT'  // Event to send results from snap to Xblock
 
 };
 
@@ -72,6 +74,18 @@ function send_msg_to_snap_iframe(msg_type, data) {
 
 function main() {
     send_msg_to_snap_iframe(MESSAGES_TYPE.DEMO, {from : "xblocK", to: "iframe (snap)"});
+
+    //Enable submit button for student to submit the answer
+    $(".status .student_submit").prop("disabled", false);
+
+    // Register for 'RESULT' event from snap TODO
+    register_callback(MESSAGES_TYPE.SUBMIT, function (data) { console.log(data); });
+
+    //Attach event after submit clicks the submit button
+    $(".status .student_submit").click(function () {
+        $(this).prop('disabled', true); //disable first
+        send_msg_to_snap_iframe(MESSAGES_TYPE.SUBMIT, {});
+    })
 }
 
 /*
@@ -81,6 +95,9 @@ function main() {
 function java_script_initializer(runtime, element) {
     console.log("Main function in xblock got called");
     configure_listener();
+
+    // Initially disble the submit button till ready event is received from Snap
+    $(".status .student_submit").prop("disabled",true);
 
     // Listen for ready event
     register_callback(MESSAGES_TYPE.READY, main);
