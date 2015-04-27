@@ -14,7 +14,8 @@ class SnapContextBlock(XBlock):
     An XBlock providing snap content inside an iframe
     """
     problem_host = String(help="Launchpad for snap content",
-                          default='http://127.0.0.1:9000/snap/launch/',
+                          # default='http://127.0.0.1:9000/snap/launch/',
+                          default='http://temomachine3.bioinformatics.vt.edu:8010/snap/launch/',
                           scope=Scope.content)
 
     problem_name = String(help="Name of the problem", default='convertFtoC_studentProgram.xml', scope=Scope.content)
