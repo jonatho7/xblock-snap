@@ -9,25 +9,22 @@ from xblock.fragment import Fragment
 #from xml.sax.saxutils import unescape
 #from xblockutils.publish_event import PublishEventMixin
 
-
-# Some configuration.
-using_local_django_server = True
-
-
 # Use this if django server is not available and you want to use custom snap version.
-using_local_snap_server = False
-
+using_custom_snap_server = True
+remote_problem_host = None
 
 class SnapContextBlock(XBlock):
     """
     An XBlock providing snap content inside an iframe
     """
 
-    if using_local_django_server:
-        custom_problem_host = 'http://127.0.0.1:9000/snap/launch/'
+    if using_custom_snap_server:
+        custom_problem_host = 'http://127.0.0.1:5000/snap'
+        global remote_problem_host
+        remote_problem_host = 'http://temomachine3.bioinformatics.vt.edu:8010/snap/getProject/'
     else:
         # Don't change this (URL)
-        custom_problem_host = 'http://temomachine3.bioinformatics.vt.edu:8010/snap/launch'
+        custom_problem_host = 'http://temomachine3.bioinformatics.vt.edu:8010/snap/launch/'
 
     problem_host = String(help="Launchpad for snap content",
                           default=custom_problem_host,
@@ -61,8 +58,10 @@ class SnapContextBlock(XBlock):
         problem_name = self.problem_name
         problem_host = self.problem_host
 
-        if using_local_snap_server:
-            absolute_snap_student_problem_url = "http://127.0.0.1:5000/snap#open:"+str(problem_host) + str(problem_name) + '/' + 'student/'
+        if using_custom_snap_server:
+            # handle the url yourself
+            absolute_snap_student_problem_url = str(problem_host) + '#open:' + str(remote_problem_host) + \
+                                                str(problem_name) + '/' + 'student/'
         else:
             absolute_snap_student_problem_url = str(problem_host) + str(problem_name) + '/' + 'student/'
 
