@@ -25,7 +25,7 @@ class SnapContextBlock(XBlock,
     if using_local_django_server:
         custom_problem_host = 'http://127.0.0.1:9000/snap/launch/'
     else:
-        custom_problem_host = 'http://temomachine3.bioinformatics.vt.edu:8010/snap/launch/'
+        custom_problem_host = 'http://temomachine3.bioinformatics.vt.edu:8010/snap/getProject/'
 
     problem_host = String(help="Launchpad for snap content",
                           default=custom_problem_host,
@@ -39,8 +39,13 @@ class SnapContextBlock(XBlock,
     watched_count = Integer(help="Number of times user has watched this snap instance", default=0,
                             scope=Scope.user_state)
 
+# <<<<<<< Updated upstream
     maxwidth = Integer(help="Maximum width of the Snap IDE", default=1150, scope=Scope.content)
     maxheight = Integer(help="Maximum height of the Snap IDE", default=500, scope=Scope.content)
+# =======
+#     maxwidth = Integer(help="Maximum width of the Snap IDE", default=800, scope=Scope.content)
+#     maxheight = Integer(help="Maximum height of the Snap IDE", default=800, scope=Scope.content)
+# >>>>>>> Stashed changes
 
 
     def student_view(self, context):
@@ -59,10 +64,15 @@ class SnapContextBlock(XBlock,
         problem_name = self.problem_name
         problem_host = self.problem_host
 
+
         if using_local_snap_server:
-            absolute_snap_student_problem_url = "http://127.0.0.1:5000/snap"
+            absolute_snap_student_problem_url = "http://127.0.0.1:5000/snap#open:"+str(problem_host) + str(problem_name) + '/' + 'student/'
         else:
             absolute_snap_student_problem_url = str(problem_host) + str(problem_name) + '/' + 'student/'
+
+        
+        # testing custom layout for datasnap instance locally 
+        # absolute_snap_student_problem_url = "http://127.0.0.1:5000/snap#open:http://temomachine3.bioinformatics.vt.edu:8010/snap/getProject/convertFtoC/student"
 
 
         # Load the HTML fragment from within the package and fill in the template
