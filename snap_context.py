@@ -4,7 +4,7 @@ import requests
 from urlparse import urlparse
 
 from xblock.core import XBlock
-from xblock.fields import Scope, String, Integer
+from xblock.fields import Scope, String, Integer, Float
 from xblock.fragment import Fragment
 #from xml.sax.saxutils import unescape
 #from xblockutils.publish_event import PublishEventMixin
@@ -41,9 +41,14 @@ class SnapContextBlock(XBlock):
     watched_count = Integer(help="Number of times user has watched this snap instance", default=0,
                             scope=Scope.user_state)
 
+    grade = Float(help="The student's grade", default=0, scope=Scope.user_state)
+
     max_width = Integer(help="Maximum width of the Snap IDE", default=1150, scope=Scope.content)
 
     max_height = Integer(help="Maximum height of the Snap IDE", default=500, scope=Scope.content)
+
+
+
 
     def student_view(self, context):
         """
@@ -79,6 +84,10 @@ class SnapContextBlock(XBlock):
         # Add message event javascript
         js_str = pkg_resources.resource_string(__name__, 'static/js/messaging_xblock.js')
         frag.add_javascript(unicode(js_str))
+
+        # Add custom css file.
+        css_str = pkg_resources.resource_string(__name__, 'static/css/custom_css.css')
+        frag.add_css(unicode(css_str))
 
         frag.initialize_js('java_script_initializer')
 
