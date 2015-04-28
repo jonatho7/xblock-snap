@@ -127,6 +127,10 @@ function java_script_initializer(runtime, element) {
         update_watched_event(runtime, element, data);
     });
 
+    register_callback(MESSAGES_TYPE.WATCHED, function (data) {
+        update_results_event(runtime, element, data);
+    });
+
     //Register for 'Tracking' event from snap
     register_callback(MESSAGES_TYPE.TRACKING, function (data){
         console.log("Tracking Data received from iframe", data);
@@ -163,5 +167,24 @@ function update_watched_event(runtime, element, data) {
 }
 
 
+function update_results_event(runtime, element, data) {
+    // Grab the grade HTML element.
+    var grade_element = $(".status .grade");
+
+    console.log(data);
+
+    $.ajax({
+        type: 'POST',
+        url: runtime.handlerUrl(element, 'handle_results_submission'),
+        data: JSON.stringify({
+                'grade': true,
+                '':''
+        }),
+        success: function (result) {
+            grade_element.text(result.grade);
+        }
+    });
+
+}
 
 

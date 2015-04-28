@@ -43,6 +43,15 @@ class SnapContextBlock(XBlock):
 
     grade = Float(help="The student's grade", default=0, scope=Scope.user_state)
 
+    highest_grade_program_xml = String(help="The student's xml which corresponds to their last graded submission with the highest score.",
+                                       default='',
+                                       scope=Scope.user_state)
+
+    last_attempt_program_xml = String(help="The student's xml which corresponds to their last attempted submission.",
+                                      default='',
+                                      scope=Scope.user_state)
+
+
     max_width = Integer(help="Maximum width of the Snap IDE", default=1150, scope=Scope.content)
 
     max_height = Integer(help="Maximum height of the Snap IDE", default=500, scope=Scope.content)
@@ -82,12 +91,11 @@ class SnapContextBlock(XBlock):
         # Add message event javascript
         js_str = pkg_resources.resource_string(__name__, 'static/js/messaging_xblock.js')
         frag.add_javascript(unicode(js_str))
+        frag.initialize_js('java_script_initializer')
 
         # Add custom css file.
         css_str = pkg_resources.resource_string(__name__, 'static/css/custom_css.css')
         frag.add_css(unicode(css_str))
-
-        frag.initialize_js('java_script_initializer')
 
         return frag
 
@@ -128,6 +136,18 @@ class SnapContextBlock(XBlock):
             self.watched_count += 1
 
         return {'watched_count': self.watched_count}
+
+    @XBlock.json_handler
+    def handle_results_submission(self, data, suffix=''):
+        """
+
+        Called to handle receiving a submission from a student.
+        Will calculate a grade, store program xml.
+        """
+        if data.get('grade'):
+            self.grade += 80
+
+        return {'grade': self.grade}
 
     @staticmethod
     def workbench_scenarios():
