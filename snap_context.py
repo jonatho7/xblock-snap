@@ -6,18 +6,19 @@ from urlparse import urlparse
 from xblock.core import XBlock
 from xblock.fields import Scope, String, Integer
 from xblock.fragment import Fragment
-from xml.sax.saxutils import unescape
-# from xblockutils.publish_event import PublishEventMixin
+#from xml.sax.saxutils import unescape
+#from xblockutils.publish_event import PublishEventMixin
 
 
 # Some configuration.
 using_local_django_server = True
+
+
+# Use this if django server is not available and you want to use custom snap version.
 using_local_snap_server = False
 
 
-class SnapContextBlock(XBlock,
-                       # PublishEventMixin
-):
+class SnapContextBlock(XBlock):
     """
     An XBlock providing snap content inside an iframe
     """
@@ -25,7 +26,8 @@ class SnapContextBlock(XBlock,
     if using_local_django_server:
         custom_problem_host = 'http://127.0.0.1:9000/snap/launch/'
     else:
-        custom_problem_host = 'http://temomachine3.bioinformatics.vt.edu:8010/snap/launch/'
+        # Don't change this (URL)
+        custom_problem_host = 'http://temomachine3.bioinformatics.vt.edu:8010/snap/launch'
 
     problem_host = String(help="Launchpad for snap content",
                           default=custom_problem_host,
@@ -40,6 +42,7 @@ class SnapContextBlock(XBlock,
                             scope=Scope.user_state)
 
     max_width = Integer(help="Maximum width of the Snap IDE", default=1150, scope=Scope.content)
+
     max_height = Integer(help="Maximum height of the Snap IDE", default=500, scope=Scope.content)
 
     def student_view(self, context):
@@ -59,10 +62,9 @@ class SnapContextBlock(XBlock,
         problem_host = self.problem_host
 
         if using_local_snap_server:
-            absolute_snap_student_problem_url = "http://127.0.0.1:5000/snap"
+            absolute_snap_student_problem_url = "http://127.0.0.1:5000/snap#open:"+str(problem_host) + str(problem_name) + '/' + 'student/'
         else:
             absolute_snap_student_problem_url = str(problem_host) + str(problem_name) + '/' + 'student/'
-
 
         # Load the HTML fragment from within the package and fill in the template
         html_str = pkg_resources.resource_string(__name__, "static/html/snap_context.html")
