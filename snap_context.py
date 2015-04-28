@@ -48,8 +48,6 @@ class SnapContextBlock(XBlock):
     max_height = Integer(help="Maximum height of the Snap IDE", default=500, scope=Scope.content)
 
 
-
-
     def student_view(self, context):
         """
         Create a fragment used to display the XBlock to a student.
