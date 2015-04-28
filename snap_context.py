@@ -12,7 +12,7 @@ from xml.sax.saxutils import unescape
 
 # Some configuration.
 using_local_django_server = False
-using_local_snap_server = False
+using_local_snap_server = True
 
 
 class SnapContextBlock(XBlock,
@@ -39,7 +39,7 @@ class SnapContextBlock(XBlock,
     watched_count = Integer(help="Number of times user has watched this snap instance", default=0,
                             scope=Scope.user_state)
 
-    maxwidth = Integer(help="Maximum width of the Snap IDE", default=800, scope=Scope.content)
+    maxwidth = Integer(help="Maximum width of the Snap IDE", default=1150, scope=Scope.content)
     maxheight = Integer(help="Maximum height of the Snap IDE", default=500, scope=Scope.content)
 
 
