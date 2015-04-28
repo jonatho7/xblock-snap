@@ -106,6 +106,10 @@ function java_script_initializer(runtime, element) {
     // Just for testing
     register_callback(MESSAGES_TYPE.DEMO, function (data) { console.log(" Data received from iframe", data); });
 
+    register_callback(MESSAGES_TYPE.WATCHED, function (data) {
+        update_watched_event(runtime, element, data);
+    });
+
     //Register for 'Tracking' event from snap
     register_callback(MESSAGES_TYPE.TRACKING, function (data){
         console.log("Tracking Data received from iframe", data);
