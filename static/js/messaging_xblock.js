@@ -72,14 +72,31 @@ function send_msg_to_snap_iframe(msg_type, data) {
     $(".snap_context #snap_iframe")[0].contentWindow.postMessage(msg, '*');
 }
 
+/*
+    Code separated out for ease of understanding
+ */
+function handle_results_from_xblock(data) {
+    /*
+        This handles the result from xblock
+     */
+    if (!data.finished) {
+        console.log("Student tests have failed");
+    }
+    // Re enable the submit button again
+    $(".status .student_submit").prop("disabled", false);
+
+}
+
+
 function main() {
     send_msg_to_snap_iframe(MESSAGES_TYPE.DEMO, {from : "xblocK", to: "iframe (snap)"});
 
     //Enable submit button for student to submit the answer
     $(".status .student_submit").prop("disabled", false);
 
-    // Register for 'RESULT' event from snap TODO
-    register_callback(MESSAGES_TYPE.SUBMIT, function (data) { console.log(data); });
+
+    // Register for 'RESULT' event from snap
+    register_callback(MESSAGES_TYPE.SUBMIT, handle_results_from_xblock);
 
     //Attach event after submit clicks the submit button
     $(".status .student_submit").click(function () {

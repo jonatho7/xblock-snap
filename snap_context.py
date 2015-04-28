@@ -11,8 +11,8 @@ from xml.sax.saxutils import unescape
 
 
 # Some configuration.
-using_local_django_server = False
-using_local_snap_server = True
+using_local_django_server = True
+using_local_snap_server = False
 
 
 class SnapContextBlock(XBlock,
@@ -39,9 +39,8 @@ class SnapContextBlock(XBlock,
     watched_count = Integer(help="Number of times user has watched this snap instance", default=0,
                             scope=Scope.user_state)
 
-    maxwidth = Integer(help="Maximum width of the Snap IDE", default=1150, scope=Scope.content)
-    maxheight = Integer(help="Maximum height of the Snap IDE", default=500, scope=Scope.content)
-
+    max_width = Integer(help="Maximum width of the Snap IDE", default=1150, scope=Scope.content)
+    max_height = Integer(help="Maximum height of the Snap IDE", default=500, scope=Scope.content)
 
     def student_view(self, context):
         """
@@ -87,8 +86,8 @@ class SnapContextBlock(XBlock,
         """
         html_str = pkg_resources.resource_string(__name__, "static/html/snap-xblock-edit.html")
 
-        frag = Fragment(unicode(html_str).format(problem_name=self.problem_name, maxwidth=self.maxwidth,
-                                                 maxheight=self.maxheight))
+        frag = Fragment(unicode(html_str).format(problem_name=self.problem_name, max_width=self.max_width,
+                                                 max_height=self.max_height))
 
         js_str = pkg_resources.resource_string(__name__, "static/js/snap-xblock-edit.js")
         frag.add_javascript(unicode(js_str))
@@ -101,8 +100,8 @@ class SnapContextBlock(XBlock,
         """
         Called when submitting the form in Studio.
         """
-        self.maxwidth = data.get('maxwidth')
-        self.maxheight = data.get('maxheight')
+        self.max_width = data.get('max_width')
+        self.max_height = data.get('max_height')
         self.problem_name = data.get('problem_name')
 
         return {'result': 'success'}
