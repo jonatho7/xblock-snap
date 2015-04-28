@@ -23,8 +23,8 @@ var MESSAGES_TYPE = {
     READY: 'READY',   // Message to indicate that iframe is setup
     WATCHED: 'WATCHED',  // Watched event to parent
     SUBMIT:  'SUBMIT',  // Submit (obviously student submit) event from Xblock
-    RESULT:  'RESULT'  // Event to send results from snap to Xblock
-
+    RESULT:  'RESULT',  // Event to send results from snap to Xblock
+    TRACKING: 'TRACKING'   //  Tracking of students' interactions with Snap IDE
 };
 
 var function_callbacks = {};
@@ -86,6 +86,7 @@ function main() {
         $(this).prop('disabled', true); //disable first
         send_msg_to_snap_iframe(MESSAGES_TYPE.SUBMIT, {});
     })
+
 }
 
 /*
@@ -105,8 +106,20 @@ function java_script_initializer(runtime, element) {
     // Just for testing
     register_callback(MESSAGES_TYPE.DEMO, function (data) { console.log(" Data received from iframe", data); });
 
-    register_callback(MESSAGES_TYPE.WATCHED, function (data) {
-        update_watched_event(runtime, element, data);
+    //Register for 'Tracking' event from snap
+    register_callback(MESSAGES_TYPE.TRACKING, function (data){
+        console.log("Tracking Data received from iframe", data);
+        $.ajax({
+                type: "POST",
+                url: runtime.handlerUrl(element, 'publish_event'),  //publish for student data analytics
+                data: JSON.stringify({
+                    url: $(".snap_context #snap_iframe")[0].src,
+                    event_type: 'edx.snap.interaction'
+                }),
+                success: function(result){
+                    console.log(result.result+':'+JSON.stringify(data));
+                }
+            });
     });
 
 }
@@ -127,4 +140,7 @@ function update_watched_event(runtime, element, data) {
     });
 
 }
+
+
+
 

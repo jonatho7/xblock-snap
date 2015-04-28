@@ -7,15 +7,16 @@ from xblock.core import XBlock
 from xblock.fields import Scope, String, Integer
 from xblock.fragment import Fragment
 from xml.sax.saxutils import unescape
+from xblockutils.publish_event import PublishEventMixin
 
 
-class SnapContextBlock(XBlock):
+class SnapContextBlock(XBlock, PublishEventMixin):
     """
     An XBlock providing snap content inside an iframe
     """
     problem_host = String(help="Launchpad for snap content",
-                          default='http://127.0.0.1:9000/snap/launch/',
-                          #default='http://temomachine3.bioinformatics.vt.edu:8010/snap/launch/',
+                          # default='http://127.0.0.1:9000/snap/launch/',
+                          default='http://temomachine3.bioinformatics.vt.edu:8010/snap/launch/',
                           scope=Scope.content)
 
     problem_name = String(help="Name of the problem", default='convertFtoC', scope=Scope.content)
@@ -46,7 +47,8 @@ class SnapContextBlock(XBlock):
         problem_name = self.problem_name
         problem_host = self.problem_host
 
-        absolute_snap_student_problem_url = str(problem_host) + str(problem_name) + '/' + 'student/'
+        # absolute_snap_student_problem_url = str(problem_host) + str(problem_name) + '/' + 'student/'
+        absolute_snap_student_problem_url = "http://127.0.0.1:5000/snap"
 
         # Load the HTML fragment from within the package and fill in the template
         html_str = pkg_resources.resource_string(__name__, "static/html/snap_context.html")
