@@ -10,8 +10,9 @@ from xblock.fragment import Fragment
 #from xblockutils.publish_event import PublishEventMixin
 
 # Use this if django server is not available and you want to use custom snap version.
-using_custom_snap_server = True
+using_custom_snap_server = False
 remote_problem_host = None
+
 
 class SnapContextBlock(XBlock):
     """
@@ -23,8 +24,10 @@ class SnapContextBlock(XBlock):
         global remote_problem_host
         remote_problem_host = 'http://temomachine3.bioinformatics.vt.edu:8010/snap/getProject/'
     else:
-        # Don't change this (URL)
-        custom_problem_host = 'http://temomachine3.bioinformatics.vt.edu:8010/snap/launch/'
+        # Don't change this (URL) if you want to use remote version
+        #custom_problem_host = 'http://temomachine3.bioinformatics.vt.edu:8010/snap/launch/'
+        # Local version if django server is hosted on the machine
+        custom_problem_host = 'http://127.0.0.1:9000/snap/launch/'
 
     problem_host = String(help="Launchpad for snap content",
                           default=custom_problem_host,
