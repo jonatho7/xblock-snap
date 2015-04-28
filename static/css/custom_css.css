@@ -1,0 +1,13 @@
+
+
+.debugDiv, .resultsDiv {
+    margin-top: 5em;
+}
+
+.debugLabel, .resultsLabel {
+    font-weight: bold;
+}
+
+.debugItem, .resultsItem {
+    margin-left: 40px;
+}
