@@ -76,6 +76,7 @@ function update_total_attempts(runtime, element) {
     /*
         Increments the total attempts counter
      */
+    console.log("Updating the total attempts counter from javascript");
     var update_element = $(".status .debugDiv .debugItem .total_attempts");
     $.ajax({
         type: 'POST',
@@ -84,6 +85,7 @@ function update_total_attempts(runtime, element) {
                 'attempt': true
         }),
         success: function (result) {
+            console.log("Got update attempts result = ", result);
             update_element.text(result.total_attempts);
         }
     });
@@ -116,6 +118,14 @@ var teacher_response = {
     Code separated out for ease of understanding
  */
 
+var problem_solved_indicator = '<i class="fa fa-check fa-lg"></i>';
+var incorrect_solution_indicator = '<i class="fa fa-times lg"></i>';
+
+var evaluation_in_process_indicator = '<i class="fa fa-spinner fa-spin fa-lg"></i></i>';
+
+function update_problem_status_indicator(html) {
+        $(".status .indicator").html(html);
+}
 
 function handle_results_from_xblock(runtime, element, data) {
     /*
@@ -130,10 +140,41 @@ function handle_results_from_xblock(runtime, element, data) {
         update_total_attempts(runtime, element, data);
         // Re enable the submit button again
         $(".status .student_submit").prop("disabled", false);
+        update_problem_status_indicator(incorrect_solution_indicator);
     } else {
         teacher_response.get_data().done(function (teacher_data) {
-            console.log(teacher_data);
-            console.log(student_data);
+            //console.log(teacher_data);
+            //console.log(student_data);
+            //Send the data to server and wait for response
+            $.ajax({
+                type: 'POST',
+                url: runtime.handlerUrl(element, 'handle_results_submission'),
+                data: JSON.stringify({
+                    'teacher_response': teacher_data,
+                    'student_response': student_data
+                }),
+                success: function (result) {
+                    // Update attempts counter
+                    console.log("Scoring completed by Server result obtained = ", result);
+                    $(".status .debugDiv .debugItem .total_attempts").text(result.total_attempts);
+
+                    //Update grade
+                    $(".status .grade").text(result.grade);
+
+                    //Enable submit if the problem is not solved completely
+                    if (!result.problem_solved)  {
+                        $(".status .student_submit").prop("disabled", false);
+                        if (result.grade == 0) {
+                            update_problem_status_indicator(incorrect_solution_indicator);
+                        } else {
+                            // Just remove the icon
+                            update_problem_status_indicator('');
+                        }
+                    } else {
+                        update_problem_status_indicator(problem_solved_indicator);
+                    }
+                }
+            });
         });
     }
 
@@ -152,6 +193,7 @@ function main() {
     $(".status .student_submit").prop("disabled", false).click(function () {
         $(this).prop('disabled', true); //disable first
         send_msg_to_snap_iframe(MESSAGES_TYPE.SUBMIT, {});
+        update_problem_status_indicator(evaluation_in_process_indicator);
     });
 
 

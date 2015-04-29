@@ -34,7 +34,6 @@ class SnapContextBlock(XBlock):
         teacher_response_path = 'http://127.0.0.1:9000/snap'
 
 
-
     problem_host = String(help="Launchpad for snap content",
                           default=custom_problem_host,
                           scope=Scope.content)
@@ -49,8 +48,8 @@ class SnapContextBlock(XBlock):
 
     grade = Float(help="The student's grade", default=0, scope=Scope.user_state)
 
-    highest_grade_program_xml = String(help="The student's xml which corresponds to their last graded submission with "
-                                            "the highest score.", default='', scope=Scope.user_state)
+    highest_grade_program_xml = String(help="The student's xml when he/she has solved the problem .", default='',
+                                       scope=Scope.user_state)
 
     last_attempt_program_xml = String(help="The student's xml which corresponds to their last attempted submission.",
                                       default='',
@@ -156,6 +155,24 @@ class SnapContextBlock(XBlock):
 
         return {'watched_count': self.watched_count}
 
+
+    @classmethod
+    def is_float(cls, value):
+        """
+
+        Determines if a string is float or not
+        :param str:
+        :return:
+        """
+        try:
+            _ = float(value)
+        except (ValueError, TypeError):
+            return False
+
+        return True
+
+
+
     @XBlock.json_handler
     def handle_results_submission(self, data, suffix=''):
         """
@@ -163,10 +180,63 @@ class SnapContextBlock(XBlock):
         Called to handle receiving a submission from a student.
         Will calculate a grade, store program xml.
         """
-        if data.get('grade'):
-            self.grade += 80
+        student_answers = None
+        teacher_answers = None
 
-        return {'grade': self.grade}
+        if data.get('student_response'):
+            # store student program XML
+            self.last_attempt_program_xml = data['student_response']['programXML']
+            self.total_attempts += 1
+            student_answers = data['student_response']['testOutputs']
+
+        if data.get('teacher_response'):
+            teacher_answers = data['teacher_response']['testOutputs']
+
+        print("Student answers =", student_answers)
+        print("teacher_answers = ", teacher_answers)
+
+        #Simple grading
+        # Every test case has 1/(len(teachers_answers)) points
+
+        if len(teacher_answers) != len(student_answers):
+            grade = 0
+            self.grade = grade
+            return {'grade': self.grade}
+
+        points = 0.0
+        point_each_case = 1.0/len(teacher_answers)
+        print("each point = ", point_each_case, " Total test cases =", len(teacher_answers))
+
+        for stud, teach in zip(student_answers, teacher_answers):
+            if SnapContextBlock.is_float(stud) == SnapContextBlock.is_float(teach):
+                if SnapContextBlock.is_float(teach):
+                    #truncate to one decimal
+                    if round(float(stud), 1) == round(float(teach), 1):
+                        points += point_each_case
+                else:
+                    if stud == teach:
+                        points += point_each_case
+
+        # If he gets a score of 1.0, then he has solved the problem
+        points = round(points, 2)
+        if points == 1.0:
+            self.problem_solved = True
+
+        if points > self.grade:
+            self.highest_grade_program_xml = data['student_response']['programXML']
+
+        self.grade = round(points, 2)
+
+        return {'grade': self.grade,
+                'problem_solved': self.problem_solved,
+                'total_attempts': self.total_attempts
+                }
+
+
+
+
+
+
 
     @XBlock.json_handler
     def update_attempts_count(self, data, suffix=''):
