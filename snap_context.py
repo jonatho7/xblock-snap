@@ -22,7 +22,7 @@ class SnapContextBlock(XBlock):
     if using_custom_snap_server:
         custom_problem_host = 'http://127.0.0.1:5000/snap'
         global remote_problem_host
-        remote_problem_host = 'http://temomachine3.bioinformatics.vt.edu:8010/snap/getProject'
+        remote_problem_host = 'http://temomachine3.bioinformatics.vt.edu:8010/snap/getProject/'
         teacher_response_path = 'http://temomachine3.bioinformatics.vt.edu:8010/snap'
 
     else:
