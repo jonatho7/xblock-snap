@@ -1,10 +1,11 @@
 import pkg_resources
 import requests
+import json
 
 from urlparse import urlparse
 
 from xblock.core import XBlock
-from xblock.fields import Scope, String, Integer, Float, Boolean
+from xblock.fields import Scope, String, Integer, Float, Boolean, Dict
 from xblock.fragment import Fragment
 #from xml.sax.saxutils import unescape
 #from xblockutils.publish_event import PublishEventMixin
@@ -22,7 +23,7 @@ class SnapContextBlock(XBlock):
     if using_custom_snap_server:
         custom_problem_host = 'http://127.0.0.1:5000/snap'
         global remote_problem_host
-        remote_problem_host = 'http://temomachine3.bioinformatics.vt.edu:8010/snap/getProject'
+        remote_problem_host = 'http://temomachine3.bioinformatics.vt.edu:8010/snap/getProject/'
         teacher_response_path = 'http://temomachine3.bioinformatics.vt.edu:8010/snap'
 
     else:
@@ -64,6 +65,10 @@ class SnapContextBlock(XBlock):
 
     max_height = Integer(help="Maximum height of the Snap IDE", default=500, scope=Scope.content)
 
+    configuration = Dict(help="Snap IDE Configuration", scope=Scope.user_state)
+
+    json_configuration = String(help="Config", scope=Scope.user_state)
+
     teacher_response_path = String("help= Path to get the teacher's response from",
                                    default=teacher_response_path, scope=Scope.content)
 
@@ -95,6 +100,12 @@ class SnapContextBlock(XBlock):
 
         teacher_problem_full_url_response = str(self.teacher_response_path) + '/' + 'get_teacher_response' + '/' + \
                                             str(self.problem_name) + '/'
+
+        # Snap IDE Configuration
+        self.configuration['vertical_layout'] = False
+        self.json_configuration = json.dumps(self.configuration)
+
+
 
         frag = Fragment(unicode(html_str).format(self=self,
                                                  absolute_snap_problem_url=absolute_snap_student_problem_url,

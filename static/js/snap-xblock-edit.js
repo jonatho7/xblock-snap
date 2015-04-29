@@ -3,8 +3,8 @@ function SnapEditBlock(runtime, element) {
     var handlerUrl = runtime.handlerUrl(element, 'studio_submit');
     var data = {
       problem_name: $(element).find('input[name=problem_name]').val(),
-      maxwidth: $(element).find('input[name=maxwidth]').val(),
-      maxheight: $(element).find('input[name=maxheight]').val()
+      max_width: $(element).find('input[name=max_width]').val(),
+      max_height: $(element).find('input[name=max_height]').val()
     };
     runtime.notify('save', {state: 'start'});
     $.post(handlerUrl, JSON.stringify(data)).done(function(response) {
