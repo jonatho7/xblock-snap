@@ -19,7 +19,6 @@
 
 var MESSAGES_TYPE = {
     DEMO:  'DEMO',  // only for demo purposes
-    SUBMIT: 'SUBMIT', //Used for communication of submit option
     READY: 'READY',   // Message to indicate that iframe is setup
     WATCHED: 'WATCHED',  // Watched event to parent
     SUBMIT:  'SUBMIT',  // Submit (obviously student submit) event from Xblock
@@ -55,6 +54,7 @@ function configure_listener() {
             if ((msg.type in function_callbacks) && ('data' in msg)) {
                 // Call all the registered function handlers
                 //console.log("len = ", function_callbacks[msg.type].length);
+
                 for (var i = 0 ; i < function_callbacks[msg.type].length; i++) {
                     function_callbacks[msg.type][i](msg.data)
                 }
@@ -72,18 +72,71 @@ function send_msg_to_snap_iframe(msg_type, data) {
     $(".snap_context #snap_iframe")[0].contentWindow.postMessage(msg, '*');
 }
 
+function update_total_attempts(runtime, element) {
+    /*
+        Increments the total attempts counter
+     */
+    var update_element = $(".status .debugDiv .debugItem .total_attempts");
+    $.ajax({
+        type: 'POST',
+        url: runtime.handlerUrl(element, 'update_attempts_count'),
+        data: JSON.stringify({
+                'attempt': true
+        }),
+        success: function (result) {
+            update_element.text(result.total_attempts);
+        }
+    });
+}
+
+/*
+    Get response from teacher version of problem by contacting
+    django server
+ */
+var teacher_response = {
+    get_data : function () {
+        if (!this.deferred) {
+            this.deferred = $.Deferred();
+            var url = $(".snap_context").data("teacher-problem-full-url-response");
+            console.log("Contacting url = ", url, " to get the teacher's output");
+            var deferred = this.deferred;
+            $.ajax(url, {
+                success: function (response) {
+                    deferred.resolve(response['data']);
+                }
+            });
+        }
+        return this.deferred.promise();
+    }
+};
+
+
+
 /*
     Code separated out for ease of understanding
  */
-function handle_results_from_xblock(data) {
+
+
+function handle_results_from_xblock(runtime, element, data) {
     /*
         This handles the result from xblock
      */
+    console.log("Trying to handle the results from snap");
+    var student_data = data;
     if (!data.finished) {
+        // Student results are wrong (in this case they have no data too). Basically, they did nothing
+        // other than clicking the submit button (or did something horribly wrong)
         console.log("Student tests have failed");
+        update_total_attempts(runtime, element, data);
+        // Re enable the submit button again
+        $(".status .student_submit").prop("disabled", false);
+    } else {
+        teacher_response.get_data().done(function (teacher_data) {
+            console.log(teacher_data);
+            console.log(student_data);
+        });
     }
-    // Re enable the submit button again
-    $(".status .student_submit").prop("disabled", false);
+
 
 }
 
@@ -91,18 +144,16 @@ function handle_results_from_xblock(data) {
 function main() {
     send_msg_to_snap_iframe(MESSAGES_TYPE.DEMO, {from : "xblocK", to: "iframe (snap)"});
 
+
+
     //Enable submit button for student to submit the answer
-    $(".status .student_submit").prop("disabled", false);
-
-
-    // Register for 'RESULT' event from snap
-    register_callback(MESSAGES_TYPE.SUBMIT, handle_results_from_xblock);
-
     //Attach event after submit clicks the submit button
-    $(".status .student_submit").click(function () {
+
+    $(".status .student_submit").prop("disabled", false).click(function () {
         $(this).prop('disabled', true); //disable first
         send_msg_to_snap_iframe(MESSAGES_TYPE.SUBMIT, {});
-    })
+    });
+
 
 }
 
@@ -113,8 +164,17 @@ function main() {
 function java_script_initializer(runtime, element) {
     console.log("Main function in xblock got called");
     configure_listener();
+    /*
+        Initiate ajax request to collect the teacher response
+        while iframe is being loaded up and student is solving
+        the problem
+    */
 
-    // Initially disble the submit button till ready event is received from Snap
+    //Do nothing, this will get the results for us ready
+    teacher_response.get_data().done(function (response) {console.log("Got the teacher response from Server")});
+
+
+    // Initially disable the submit button till ready event is received from Snap
     $(".status .student_submit").prop("disabled",true);
 
     // Listen for ready event
@@ -127,9 +187,12 @@ function java_script_initializer(runtime, element) {
         update_watched_event(runtime, element, data);
     });
 
-    register_callback(MESSAGES_TYPE.WATCHED, function (data) {
-        update_results_event(runtime, element, data);
+
+    // Register for 'RESULT' event from snap
+    register_callback(MESSAGES_TYPE.RESULT, function (data) {
+        handle_results_from_xblock(runtime, element, data);
     });
+
 
     //Register for 'Tracking' event from snap
     register_callback(MESSAGES_TYPE.TRACKING, function (data){
@@ -149,6 +212,7 @@ function java_script_initializer(runtime, element) {
 
 }
 
+
 function update_watched_event(runtime, element, data) {
     // Update watched count variable on Xblock
     var update_element = $(".status .watched_count");
@@ -167,11 +231,11 @@ function update_watched_event(runtime, element, data) {
 }
 
 
-function update_results_event(runtime, element, data) {
+function update_results_event(runtime, element, student_data, teacher_data) {
     // Grab the grade HTML element.
     var grade_element = $(".status .grade");
 
-    console.log(data);
+    console.log("contacting runtime to calculate the grade for the problem");
 
     $.ajax({
         type: 'POST',

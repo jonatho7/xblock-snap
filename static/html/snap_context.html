@@ -1,5 +1,5 @@
 
-<div class="snap_context">
+<div class="snap_context" data-teacher-problem-full-url-response="{teacher_problem_full_url_response}">
 
     <div style="margin: 2em 0em">
 
@@ -22,12 +22,19 @@
 
             <div class="debugDiv">
                 <p class="debugLabel">Debug Information</p>
+
                 <p class="debugItem">
-                    Opened <span class="opened_count">{self.opened_count}</span> time(s) <i class="fa fa-eye"></i>
+                    Opened <span class="opened_count">{self.opened_count}</span> time(s)
                 </p>
+
                 <p class="debugItem">
                     Watched <span class="watched_count">{self.watched_count}</span> time(s) <i class="fa fa-eye"></i>
                 </p>
+
+                <p class="debugItem">
+                    Total Attempts so far: <span class="total_attempts">{self.total_attempts}</span> time(s)
+                </p>
+
                 <p class="debugItem problem_url">
                     Problem URL: {absolute_snap_problem_url}
                 </p>

@@ -4,7 +4,7 @@ import requests
 from urlparse import urlparse
 
 from xblock.core import XBlock
-from xblock.fields import Scope, String, Integer, Float
+from xblock.fields import Scope, String, Integer, Float, Boolean
 from xblock.fragment import Fragment
 #from xml.sax.saxutils import unescape
 #from xblockutils.publish_event import PublishEventMixin
@@ -22,12 +22,18 @@ class SnapContextBlock(XBlock):
     if using_custom_snap_server:
         custom_problem_host = 'http://127.0.0.1:5000/snap'
         global remote_problem_host
-        remote_problem_host = 'http://temomachine3.bioinformatics.vt.edu:8010/snap/getProject/'
+        remote_problem_host = 'http://temomachine3.bioinformatics.vt.edu:8010/snap/getProject'
+        teacher_response_path = 'http://temomachine3.bioinformatics.vt.edu:8010/snap'
+
     else:
         # Don't change this (URL) if you want to use remote version
         #custom_problem_host = 'http://temomachine3.bioinformatics.vt.edu:8010/snap/launch/'
         # Local version if django server is hosted on the machine
+
         custom_problem_host = 'http://127.0.0.1:9000/snap/launch/'
+        teacher_response_path = 'http://127.0.0.1:9000/snap'
+
+
 
     problem_host = String(help="Launchpad for snap content",
                           default=custom_problem_host,
@@ -43,19 +49,24 @@ class SnapContextBlock(XBlock):
 
     grade = Float(help="The student's grade", default=0, scope=Scope.user_state)
 
-    highest_grade_program_xml = String(help="The student's xml which corresponds to their last graded submission with the highest score.",
-                                       default='',
-                                       scope=Scope.user_state)
+    highest_grade_program_xml = String(help="The student's xml which corresponds to their last graded submission with "
+                                            "the highest score.", default='', scope=Scope.user_state)
 
     last_attempt_program_xml = String(help="The student's xml which corresponds to their last attempted submission.",
                                       default='',
                                       scope=Scope.user_state)
 
+    total_attempts = Integer(help="Total number of attempts made by student (inclusive of successful submission",
+                             default=0, scope=Scope.user_state)
+
+    problem_solved = Boolean(help="Is the problem instance solved by student", default=False, Scope=Scope.user_state)
 
     max_width = Integer(help="Maximum width of the Snap IDE", default=1150, scope=Scope.content)
 
     max_height = Integer(help="Maximum height of the Snap IDE", default=500, scope=Scope.content)
 
+    teacher_response_path = String("help= Path to get the teacher's response from",
+                                   default=teacher_response_path, scope=Scope.content)
 
     def student_view(self, context):
         """
@@ -82,10 +93,18 @@ class SnapContextBlock(XBlock):
 
         # Load the HTML fragment from within the package and fill in the template
         html_str = pkg_resources.resource_string(__name__, "static/html/snap_context.html")
+
+        teacher_problem_full_url_response = str(self.teacher_response_path) + '/' + 'get_teacher_response' + '/' + \
+                                            str(self.problem_name) + '/'
+
         frag = Fragment(unicode(html_str).format(self=self,
                                                  absolute_snap_problem_url=absolute_snap_student_problem_url,
                                                  opened_count=self.opened_count,
-                                                 watched_count=self.watched_count))
+                                                 watched_count=self.watched_count,
+                                                 total_attempts=self.total_attempts,
+                                                 teacher_problem_full_url_response=teacher_problem_full_url_response
+                                                 ))
+
 
 
         # Add message event javascript
@@ -148,6 +167,22 @@ class SnapContextBlock(XBlock):
             self.grade += 80
 
         return {'grade': self.grade}
+
+    @XBlock.json_handler
+    def update_attempts_count(self, data, suffix=''):
+        """
+
+        Updates the attempts counter
+        :param data:
+        :param suffix:
+        :return:
+        """
+        if data.get('attempt'):
+            self.total_attempts += 1
+
+        return {
+            'total_attempts': self.total_attempts
+        }
 
     @staticmethod
     def workbench_scenarios():
