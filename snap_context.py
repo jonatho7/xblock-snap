@@ -66,9 +66,9 @@ class SnapContextBlock(XBlock):
 
     max_height = Integer(help="Maximum height of the Snap IDE", default=500, scope=Scope.content)
 
-    configuration = Dict(help="Snap IDE Configuration", scope=Scope.content)
+    configuration = Dict(help="Snap IDE Configuration", scope=Scope.user_state)
 
-    json_configuration = String(help="Config", scope=Scope.content)
+    json_configuration = String(help="Config", scope=Scope.user_state)
 
     teacher_response_path = String("help= Path to get the teacher's response from",
                                    default=teacher_response_path, scope=Scope.content)
