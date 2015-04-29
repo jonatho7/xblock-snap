@@ -196,17 +196,17 @@ function java_script_initializer(runtime, element) {
     //Register for 'Tracking' event from snap
     register_callback(MESSAGES_TYPE.TRACKING, function (data){
         console.log("Tracking Data received from iframe", data);
-        $.ajax({
-                type: "POST",
-                url: runtime.handlerUrl(element, 'publish_event'),  //publish for student data analytics
-                data: JSON.stringify({
-                    url: $(".snap_context #snap_iframe")[0].src,
-                    event_type: 'edx.snap.interaction'
-                }),
-                success: function(result){
-                    console.log(result.result+':'+JSON.stringify(data));
-                }
-            });
+//        $.ajax({
+//                type: "POST",
+//                url: runtime.handlerUrl(element, 'publish_event'),  //publish for student data analytics only work with Devstack
+//                data: JSON.stringify({
+//                    url: $(".snap_context #snap_iframe")[0].src,
+//                    event_type: 'edx.snap.interaction'
+//                }),
+//                success: function(result){
+//                    console.log(result.result+':'+JSON.stringify(data));
+//                }
+//            });
     });
 
 
