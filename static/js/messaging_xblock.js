@@ -23,7 +23,8 @@ var MESSAGES_TYPE = {
     WATCHED: 'WATCHED',  // Watched event to parent
     SUBMIT:  'SUBMIT',  // Submit (obviously student submit) event from Xblock
     RESULT:  'RESULT',  // Event to send results from snap to Xblock
-    TRACKING: 'TRACKING'   //  Tracking of students' interactions with Snap IDE
+    TRACKING: 'TRACKING',   //  Tracking of students' interactions with Snap IDE
+    CONFIG: 'CONFIG' //Configuration for Snap IDE
 };
 
 var function_callbacks = {};
@@ -136,15 +137,11 @@ function handle_results_from_xblock(runtime, element, data) {
             console.log(student_data);
         });
     }
-
-
 }
 
 
 function main() {
     send_msg_to_snap_iframe(MESSAGES_TYPE.DEMO, {from : "xblocK", to: "iframe (snap)"});
-
-
 
     //Enable submit button for student to submit the answer
     //Attach event after submit clicks the submit button
@@ -154,6 +151,8 @@ function main() {
         send_msg_to_snap_iframe(MESSAGES_TYPE.SUBMIT, {});
     });
 
+    //Initializing Snap IDE Layout
+    send_msg_to_snap_iframe(MESSAGES_TYPE.CONFIG, JSON.parse($(".snap_context .config").text()));
 
 }
 
@@ -209,6 +208,8 @@ function java_script_initializer(runtime, element) {
                 }
             });
     });
+
+
 
 }
 
