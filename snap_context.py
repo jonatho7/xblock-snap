@@ -41,6 +41,12 @@ class SnapContextBlock(XBlock):
 
     problem_name = String(help="Name of the problem", default='convertFtoC', scope=Scope.content)
 
+    problem_title = String(help="Title of the problem", default='Convert Fahrenheit to Celsius', scope=Scope.content)
+
+    problem_text = String(help="Text of the problem",
+                          default='In this example, you will be responsible for converting the current Fahrenheit temperature of a city to its current Celsius temperature. More specifically, you will first need to acquire the temperature of the city in Fahrenheit, convert this temperature using basic arithmetic to its Celsius equivalent, and then report the temperature in Celsius as your answer. Note that the first part of the problem has been done for you to get you started.',
+                          scope=Scope.content)
+
     opened_count = Integer(help="Number of times user has opened this snap xblock", default=0,
                             scope=Scope.user_state)
 
